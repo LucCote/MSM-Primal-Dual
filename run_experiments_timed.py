@@ -152,14 +152,14 @@ if __name__ == '__main__':
 
         minSize = 25 # min cluster size
         maxSize = 100 # max cluster size
-        numberC = int(np.ceil(np.float(size_of_ground_set) / np.mean((minSize, maxSize))))
+        numberC = int(np.ceil(float(size_of_ground_set) / np.mean((minSize, maxSize))))
         p = 0.01  # = prob of edge
         A = GraphGenerators.SBMSparseCSR(numberC, minSize, maxSize, p)
         A.setdiag(1)
 
         if A.shape[0] <= 1000:
             A = A.toarray()
-            A.astype(np.bool)
+            A.astype(bool)
             # Generate our NetCover class containing the function
             objective_rootprocessor = NetCover.NetCover(A)
         else:
@@ -206,7 +206,7 @@ if __name__ == '__main__':
         if size_of_ground_set <= 1000:
             A = GraphGenerators.ErdosRenyiSymBool(size_of_ground_set, p)
             np.fill_diagonal(A, 1)
-            A.astype(np.bool)
+            A.astype(bool)
             objective_rootprocessor = NetCover.NetCover(A)
 
         else:
@@ -251,7 +251,7 @@ if __name__ == '__main__':
         if size_of_ground_set <= 1000:
             A = np.asarray( nx.to_numpy_matrix(G) )
             np.fill_diagonal(A, 1)
-            A.astype(np.bool)
+            A.astype(bool)
             print( 'size of A', A.shape[0])
             print( 'density of A', np.sum(A)/len(A)**2)
             # Generate our NetCover class containing the function
@@ -298,7 +298,7 @@ if __name__ == '__main__':
             A = np.asarray( nx.to_numpy_matrix(G) )
             np.fill_diagonal(A, 1)
 
-            A.astype(np.bool)
+            A.astype(bool)
             print( 'size of A', A.shape[0])
             print( 'density of A', np.sum(A)/len(A)**2)
             objective_rootprocessor = NetCover.NetCover(A)
@@ -356,7 +356,7 @@ if __name__ == '__main__':
     A = nx.to_scipy_sparse_matrix(net_nx, format='csr')
     A.setdiag(1)
 
-    A = A.toarray().astype(np.bool)
+    A = A.toarray().astype(bool)
 
     p = 0.01
     objective = InfluenceMax.InfluenceMax(A, p)
