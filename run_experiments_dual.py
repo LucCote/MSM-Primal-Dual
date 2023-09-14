@@ -98,6 +98,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
     queries_vec = []
     time_vec = []
     dual_vec = []
+    dualhist_vec = []
     
     # Save data progressively. 
     for ii, kk in enumerate(k_vals_vec):
@@ -110,7 +111,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
             queries_r = []
 
             # Run the algorithm
-            val, queries, time, sol, sol_r, time_r, queries_r, dual = submodular.primal_dual(objective, kk)
+            val, queries, time, sol, sol_r, time_r, queries_r, dual, dualhist = submodular.primal_dual(objective, kk)
         
             if rank == p_root:
                 print('f(S)=', val, 'queries=', queries, 'time=', time, algostring, experiment_string, 'k=', kk)
@@ -120,6 +121,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
                 queries_vec.append(queries)
                 time_vec.append(time)
                 dual_vec.append(dual)
+                dualhist_vec.append(dualhist)
 
                 ## Save data progressively
                 print(len(val_vec), len(np.concatenate([np.repeat(range(trials), ii), range(1, (trial+1))])))
@@ -129,7 +131,8 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
                                         'dual':    dual_vec, \
                                         'k':       np.concatenate([np.repeat(k_vals_vec[:ii], trials), [kk]*(trial+1)]), \
                                         'n':       [size_groundset]*(ii*trials+trial+1), \
-                                        'trial':   np.concatenate([np.tile(range(1,(trials+1)), ii), range(1, (trial+2))])
+                                        'trial':   np.concatenate([np.tile(range(1,(trials+1)), ii), range(1, (trial+2))]), \
+                                        'dual_history': dualhist_vec
                                         })
                 dataset.to_csv(path_or_buf = filepath_string + experiment_string +'_'+ algostring +".csv", index=False)
 

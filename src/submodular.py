@@ -46,7 +46,7 @@ def greedy(objective, k):
 
     L = []
     N = [ele for ele in objective.groundset]
-    # dualfits = []
+    dualfits = []
 
     L_rounds = []
     time_rounds = [0]
@@ -66,12 +66,12 @@ def greedy(objective, k):
         L_rounds.append([ele for ele in L])
         time_rounds.append((datetime.now() - time0).total_seconds())
         query_rounds.append(queries)
-        # mFj = max([objective.marginalval( [elem], L ) for elem in N])
-        # dualfits.append(k*mFj + objective.value(L))
+        mFj = max([objective.marginalval( [elem], L ) for elem in N])
+        dualfits.append(k*mFj + objective.value(L))
 
     val = objective.value(L)
     time = (datetime.now() - time0).total_seconds()
-    return val, queries, time, L, L_rounds, time_rounds, query_rounds
+    return val, queries, time, L, L_rounds, time_rounds, query_rounds, min(dualfits)
 
 def primal_dual(objective, k):
     ''' 
@@ -103,6 +103,7 @@ def primal_dual(objective, k):
     L_rounds = []
     time_rounds = [0]
     query_rounds = [0]
+    dual_hist = []
 
     # initialize betas, alpha, gamma, and tight set
     b = np.array([float(objective.value([ele])) for ele in N])
@@ -118,10 +119,11 @@ def primal_dual(objective, k):
     FL = objective.value(L)
     queries += len(N)+1
 
-    for i in range(k):
+    for i in range(k+1):
         if i%25==0:
             print('primal-dual round', i, 'of', k)
-        
+        if i == k:
+            print("i=k, dual derivative is ", (k*da)+dy)
         while (k*da)+dy < 0:
             # find the da limiting tight element
             js = T[0]
@@ -153,6 +155,9 @@ def primal_dual(objective, k):
             da = db[l]
             T = np.argwhere(b >= a).flatten()
         # make next pick
+        dual_hist.append(k*a + y)
+        if i == k:
+            continue
         p = T[0]
         for j in T:
             if db[j] > db[p]: p = j
@@ -175,7 +180,7 @@ def primal_dual(objective, k):
     val = objective.value(L)
     time = (datetime.now() - time0).total_seconds()
 
-    return val, queries, time, L, L_rounds, time_rounds, query_rounds, ((k*a)+y)
+    return val, queries, time, L, L_rounds, time_rounds, query_rounds, ((k*a)+y), dual_hist
 
 FPE = 0.001
 def method3(objective, k, S):

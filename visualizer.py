@@ -1,5 +1,6 @@
 import csv
 import matplotlib.pyplot as plt
+from ast import literal_eval
 
 Greedy_Trials = ["ADAPTIVEm95_BA_GREEDY.csv", "ADAPTIVEm95_ER_GREEDY.csv",  "ADAPTIVEm95_SBM_GREEDY.csv", "ADAPTIVEm95_WS_GREEDY.csv", "ADAPTIVEm95_CAROAD_GREEDY.csv", "ADAPTIVEm95_INFMAXCalTech_GREEDY.csv", "ADAPTIVEm95_YOUTUBE50_GREEDY.csv"]
 PrimalDual_Trials = ["ADAPTIVEm95_BA_Primal-Dual.csv", "ADAPTIVEm95_ER_Primal-Dual.csv", "ADAPTIVEm95_SBM_Primal-Dual.csv", "ADAPTIVEm95_WS_Primal-Dual.csv", "ADAPTIVEm95_CAROAD_Primal-Dual.csv", "ADAPTIVEm95_INFMAXCalTech_Primal-Dual.csv", "ADAPTIVEm95_YOUTUBE50_Primal-Dual.csv"]
@@ -20,6 +21,7 @@ curvature_avgs = []
 for i in range(len(Greedy_Trials)):
     greedy_vals = []
     dual_vals = []
+    dualhist_vals = []
     dualfit_vals = []
     DUAL_vals = []
     topk_vals = []
@@ -42,6 +44,7 @@ for i in range(len(Greedy_Trials)):
        for row in reader_pd:
            pd_vals.append(float(row[0]))
            dual_vals.append(float(row[3]))
+           dualhist_vals.append(literal_eval(row[7]))
     with open("experiment_results_output_data/"+Upper_Trials[i]) as pdcsv:
        reader_pd = csv.reader(pdcsv, delimiter =',')
        next(reader_pd)
@@ -51,15 +54,15 @@ for i in range(len(Greedy_Trials)):
            marginal_vals.append(float(row[2]))
            curvature_vals.append(float(row[3]))
     X = k_vals
-    ax1 = int(i / 4)
-    ax2 = i % 4
+    # ax1 = int(i / 4)
+    # ax2 = i % 4
 
     # ax[ax1, ax2].plot(X, greedy_vals, color = 'r', label = 'Greedy', linestyle='-', marker='o')
     # ax[ax1, ax2].plot(X, pd_vals, color = 'purple', label = 'Primal-Dual', linestyle='-', marker='x')
-    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, dual_vals)], color = 'r', label = 'greedy/'+'$\sf{dual}$', linestyle='-', marker='o')
-    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(pd_vals, dual_vals)], color = 'purple', label = 'primal-dual/'+'$\sf{dual}$', linestyle='-', marker='x')
-    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, dualfit_vals)], color = 'r', label = 'greedy/'+'$\sf{dualfit}$', linestyle='--', marker='^')
-    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(pd_vals, dualfit_vals)], color = 'purple', label = 'primal-dual/'+'$\sf{dualfit}$', linestyle='--', marker='s')
+    # # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, dual_vals)], color = 'r', label = 'greedy/'+'$\sf{dual}$', linestyle='-', marker='o')
+    # # ax[ax1, ax2].plot(X, [l / j for l, j in zip(pd_vals, dual_vals)], color = 'purple', label = 'primal-dual/'+'$\sf{dual}$', linestyle='-', marker='x')
+    # # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, dualfit_vals)], color = 'r', label = 'greedy/'+'$\sf{dualfit}$', linestyle='--', marker='^')
+    # # ax[ax1, ax2].plot(X, [l / j for l, j in zip(pd_vals, dualfit_vals)], color = 'purple', label = 'primal-dual/'+'$\sf{dualfit}$', linestyle='--', marker='s')
     # ax[ax1, ax2].set(xlabel='k Value', ylabel='Objective Value')
     # ax[ax1, ax2].set_title(Trial_Names[i] + " (n=" +str(n)+")")
 
@@ -67,15 +70,20 @@ for i in range(len(Greedy_Trials)):
     ax2 = i % 4
     # fig = plt.figure(figsize=(12,6))
     # ax = plt.subplot(111)
-    X = k_vals
-    ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, dual_vals)], color = 'purple', label = '$\sf{dual}$', linestyle='-', marker='o')
-    ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, dualfit_vals)], color = 'orange', label = '$\sf{dualfit}$', linestyle='-', marker='x')
-    ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, DUAL_vals)], color = 'g', label = 'BQSDUAL', linestyle='--', marker='^')
-    ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, topk_vals)], color = 'r', label = 'topk', linestyle='--', marker='s')
-    ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, marginal_vals)], color = 'b', label = 'marginal', linestyle='--', marker='p')
-    ax[ax1, ax2].plot(X, curvature_vals, color = 'brown', label = 'curvature', linestyle='--', marker='*')
-    ax[ax1, ax2].set(xlabel='k Value', ylabel='Approximation Bound')
+    X = [i for i in range(k_vals[-1]+1)]
+    ax[ax1, ax2].plot(X, dualhist_vals[-1])
+    ax[ax1, ax2].set(xlabel='iteration', ylabel='Dual Value')
     ax[ax1, ax2].set_title(Trial_Names[i] + " (n=" +str(n)+")")
+
+    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, dual_vals)], color = 'purple', label = '$\sf{dual}$', linestyle='-', marker='o')
+    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, dualorig_vals)], color = 'g', label = 'original $\sf{dual}$', linestyle='-', marker='o')
+    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, dualfit_vals)], color = 'orange', label = '$\sf{dualfit}$', linestyle='-', marker='x')
+    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, DUAL_vals)], color = 'g', label = 'BQSDUAL', linestyle='--', marker='^')
+    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, topk_vals)], color = 'r', label = 'topk', linestyle='--', marker='s')
+    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, marginal_vals)], color = 'b', label = 'marginal', linestyle='--', marker='p')
+    # ax[ax1, ax2].plot(X, curvature_vals, color = 'brown', label = 'curvature', linestyle='--', marker='*')
+    # ax[ax1, ax2].set(xlabel='k Value', ylabel='Approximation Bound')
+    # ax[ax1, ax2].set_title(Trial_Names[i] + " (n=" +str(n)+")")
 
     # dualfit_avgs.append(mean([l / j for l, j in zip(greedy_vals, dualfit_vals)]))
     # topk_avgs.append(mean([l / j for l, j in zip(greedy_vals, topk_vals)]))
