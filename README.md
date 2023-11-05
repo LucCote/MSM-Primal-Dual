@@ -1,5 +1,5 @@
 ### Primal-Dual Monotone Submodular Maximization
-This repository contains the code for the experiments in "Primal-Dual Algorithm for Monotone Submodular Maximization under Cardinality Constraints" by Deeparnab Chakrabarty and Luc Cote. All experiments were run on a linode compute server using an anaconda environment. Experimental results can be found in the[experiment_results_output_data](./experiment_results_output_data) folder, and graphs summarizing these results can be found in the[visuals](./visuals) folder.
+This repository contains the code for the experiments in "Primal-Dual Algorithm for Monotone Submodular Maximization under Cardinality Constraints" by Deeparnab Chakrabarty and Luc Cote. All experiments were run on a linode compute server using an anaconda environment. Experimental results can be found in the [experiment_results_output_data](./experiment_results_output_data) folder, and graphs summarizing these results can be found in the [visuals](./visuals) folder.
 
 ### Acknolwedgement
 This code was adapted from the submodular library written by Adam Breuer. The readme from that repository is included below. 
