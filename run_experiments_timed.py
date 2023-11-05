@@ -1,5 +1,5 @@
 """
-@author: Adam Breuer
+@author: Luc Cote, using scaffolding from Adam Breuer
 """
 
 import numpy as np
@@ -62,7 +62,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
             # Run the algorithm
             valG, queriesG, timeG, solG, sol_rG, time_rG, queries_rG = submodular.greedy(objective, kk)
             valPD, queriesPD, timePD, solPD, sol_rPD, time_rPD, queries_rPD, dual = submodular.primal_dual(objective, kk)
-            valD, queriesD, timeD = submodular.DUAL(objective, kk, [[]]+sol_rG)
+            valD, queriesD, timeD = submodular.BQSBOUND(objective, kk, [[]]+sol_rG)
 
             if rank == p_root:
                 print('DUAL=', valD, 'queriesD=', queriesD, 'timeD=', timeD + timeG, 'dual=',dual, 'queriesPD=', queriesPD, 'timePD=', timePD, algostring, experiment_string, 'k=', kk)

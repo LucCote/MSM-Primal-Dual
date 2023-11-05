@@ -61,7 +61,7 @@ def greedy(objective, k):
         L.append( N[bestVal_idx] )
         #print('G adding this value to solution:', ele_vals[bestVal_idx] )
 
-        queries += len(N)
+        queries += 2*len(N)
         N.remove( N[bestVal_idx] )
         L_rounds.append([ele for ele in L])
         time_rounds.append((datetime.now() - time0).total_seconds())
@@ -117,7 +117,7 @@ def primal_dual(objective, k):
      # track marginals and overall value
     F = [objective.marginalval( [ele], L ) for ele in N]
     FL = objective.value(L)
-    queries += len(N)+1
+    queries += 2*len(N)+1
 
     for i in range(k+1):
         if i%25==0:
@@ -165,7 +165,7 @@ def primal_dual(objective, k):
         # update rates
         F = [objective.marginalval( [ele], L ) for ele in N]
         FL = objective.value(L)
-        queries += len(N)+1
+        queries += 2*len(N)+1
         dy = FL - y
         for j in range(len(N)):
             db[j] = F[j] - b[j]
@@ -194,10 +194,8 @@ def method3(objective, k, S):
     
     OUTPUTS:
     float sum(V) -- an upper bound on the optimal solution
-    int queries -- the total queries (marginal values count as 2 queries since f(T)-f(S) 
     '''
     check_inputs(objective, k)
-    queries = 0
     N = [ele for ele in objective.groundset]
     N.sort(key=lambda ele: -1*objective.marginalval( [ele], S))
     v = np.array([0.0 for i in range(k)])
@@ -206,7 +204,6 @@ def method3(objective, k, S):
     for j in range(k):
         i_s = None
         for i in range(start, len(N)):
-            queries += 2
             if objective.marginalval(N[:i+1], S) - sv >= objective.marginalval( [N[i]], S) - FPE:
                 i_s = i
                 break
@@ -215,18 +212,27 @@ def method3(objective, k, S):
             v[j] = objective.marginalval( N[:i_s+1], S) - sv
         else:
             v[j] = objective.marginalval( [N[i_s]], S)
-        queries += 3
         start = i_s
         sv += v[j]
-    return sum(v), queries
+    return sum(v)
 
-def DUAL(objective, k, S):
+def BQSBOUND(objective, k, S):
+    ''' 
+    @author: Luc Cote
+    Balkanski, Qian, and Singer paper method4: for k steps.
+    
+    INPUTS:
+    class objective -- contains the methods 'value()' that we want to optimize and its marginal value function 'marginalval()' 
+    int k -- the cardinality constraint
+    list S -- contains k+1 sets derived from iterations of the greedy algorithm on this k-MSM instance
+    
+    OUTPUTS:
+    float sum(V) -- an upper bound on the optimal solution
+    '''
     check_inputs(objective, k)
-    queries = 0
     time0 = datetime.now()
     N = [ele for ele in objective.groundset]
     OPT = objective.value(N)
-    queries += 1
     i = 0
     for Si in S:
         if i > 50: break
@@ -234,17 +240,40 @@ def DUAL(objective, k, S):
             continue
         OPTP, qm3 = method3(objective, k, Si)
         OPT = min(OPT, OPTP + objective.value(Si))
-        queries += qm3+1
         i += 1
     time = (datetime.now() - time0).total_seconds()
-    return OPT, queries, time
+    return OPT, time
+
 
 def topk(objective, k):
+    ''' 
+    @author: Luc Cote
+    Simplistic upper bound which returns the sum of the k highest singletons
+    
+    INPUTS:
+    class objective -- contains the methods 'value()' that we want to optimize and its marginal value function 'marginalval()' 
+    int k -- the cardinality constraint
+    
+    OUTPUTS:
+    float sum([objective.value([ele]) for ele in N[:k]]) -- an upper bound on the optimal solution
+    '''
     N = [ele for ele in objective.groundset]
     N.sort(key=lambda ele: -1*objective.value([ele]))
     return sum([objective.value([ele]) for ele in N[:k]])
 
 def marginal(objective, k, S):
+    ''' 
+    @author: Luc Cote
+    'Traditional' upper bound described in BQS paper which uses marginal values between greedy sets
+    
+    INPUTS:
+    class objective -- contains the methods 'value()' that we want to optimize and its marginal value function 'marginalval()' 
+    int k -- the cardinality constraint
+    list S -- contains k+1 sets derived from iterations of the greedy algorithm on this k-MSM instance
+    
+    OUTPUTS:
+    float OPT -- an upper bound on the optimal solution
+    '''
     N = [ele for ele in objective.groundset]
     OPT = objective.value(N)
     for i in range(len(S)):
@@ -254,6 +283,17 @@ def marginal(objective, k, S):
     return OPT
 
 def curvature(objective, k):
+    ''' 
+    @author: Luc Cote
+    'Traditional' upper bound described in BQS paper which approximates the curvature of a submodular instance
+    
+    INPUTS:
+    class objective -- contains the methods 'value()' that we want to optimize and its marginal value function 'marginalval()' 
+    int k -- the cardinality constraint
+    
+    OUTPUTS:
+    float OPT -- an upper bound on the optimal solution
+    '''
     N = [ele for ele in objective.groundset]
     a = N[0]
     ascore = objective.marginalval([a], N[1:])/objective.value([a])
@@ -279,5 +319,5 @@ def curvature(objective, k):
 def upper_bounds(objective, k):
     val, queries, time, L, L_hist, time_rounds, query_rounds, dualfits = greedy(objective, k)
     S = [[]] + L_hist # include empty greedy solution
-    DUALval, queries, time = DUAL(objective, k, S)
-    return DUALval, topk(objective, k), marginal(objective, k, S), curvature(objective, k)
+    BQSval, time = BQSBOUND(objective, k, S)
+    return BQSval, topk(objective, k), marginal(objective, k, S), curvature(objective, k)

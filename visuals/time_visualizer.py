@@ -1,3 +1,6 @@
+"""
+@author: Luc Cote
+"""
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,7 +32,7 @@ for i in range(len(Trials)):
     k_vec = []
     n = 0
     # dual,DUAL,greedy,pd,queriesG,queriesPD,queriesD,timeG,timePD,timeD,k,n,trial
-    with open("experiment_results_output_data/"+Trials[i]) as greedycsv:
+    with open("../experiment_results_output_data/"+Trials[i]) as greedycsv:
       reader_greedy = csv.reader(greedycsv, delimiter =',')
       next(reader_greedy)
       valG_vec_sub = []
@@ -68,7 +71,8 @@ for i in range(len(Trials)):
           timeD_vec.append(np.median(timeD_vec_sub))
           k_vec.append(np.median(k_vec_sub))
         n = int(row[11])
-    # X = [k for k in range(len(greedy_vals))]
+    
+    ### Time vs. K value
     ax1 = int(i / 4)
     ax2 = i % 4
     X = k_vec
@@ -77,45 +81,6 @@ for i in range(len(Trials)):
     ax[ax1, ax2].plot(X, timeG_vec, color = 'r', label = 'greedy', linestyle='-', marker='s')
     ax[ax1, ax2].set(xlabel='k Value', ylabel='Time (seconds)')
     ax[ax1, ax2].set_title(Trial_Names[i] + " (n=" +str(n)+")")
-
-    # fig = plt.figure(figsize=(12,6))
-    # ax = plt.subplot(111)
-    # X = k_vec
-    # ax.plot(X, queriesPD_vec, color = 'g', label = 'Primal Dual', linestyle='-')
-    # ax.plot(X, queriesD_vec, color = 'b', label = 'DUAL', linestyle='-')
-    # ax.plot(X, queriesG_vec, color = 'r', label = 'Greedy', linestyle='-')
-    # plt.xlabel("k Value")
-    # plt.ylabel("Queries")
-    # plt.title(Trial_Names[i] + " (n=" +str(n)+")")
-    # # Shrink current axis by 20%
-    # box = ax.get_position()
-    # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-    # # Put a legend to the right of the current axis
-    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    # plt.show()  
-
-    # fig = plt.figure(figsize=(12,6))
-    # ax = plt.subplot(111)
-    # X = k_vec
-    # ax.plot(X, valG_vec, color = 'g', label = 'Greedy', linestyle='-')
-    # ax.plot(X, valPD_vec, color = 'b', label = 'Primal Dual Solution', linestyle='-')
-    # ax.plot(X, dual_vec, color = 'b', label = 'Primal Dual Upper', linestyle='--')
-    # plt.xlabel("k Value")
-    # plt.ylabel("Value")
-    # plt.title(Trial_Names[i] + " (n=" +str(n)+")")
-    # # Shrink current axis by 20%
-    # box = ax.get_position()
-    # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-    # # Put a legend to the right of the current axis
-    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    # plt.show()  
-
-    # print(Trial_Names[i])
-    # print("Greedy/Dual", mean([l / j for l, j in zip(greedy_vals, dual_vals)]))
-    # print("Primal-Dual/Dual", mean([l / j for l, j in zip(pd_vals, dual_vals)]))
-    # print("Greedy/DualFit", mean([l / j for l, j in zip(greedy_vals, dualfit_vals)]))
-    # print("Primal-Dual/DualFit", mean([l / j for l, j in zip(pd_vals, dualfit_vals)]))
-    # print("-------------------------------------------------------")
 
 figure.delaxes(ax[1, 3])
 ax[1][2].legend(loc='center left', bbox_to_anchor=(1.3, 0.5))

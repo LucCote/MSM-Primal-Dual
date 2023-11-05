@@ -1,5 +1,5 @@
 """
-@author: Adam Breuer
+@author: Luc Cote, using scaffolding from Adam Breuer
 """
 
 import numpy as np
