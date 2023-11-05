@@ -1,0 +1,12 @@
+name: submodular_env
+channels:
+  - defaults
+dependencies:
+  - numpy=1.15.4
+  - scipy=1.1.0
+  - pandas=0.24.2 
+  - networkx=2.1
+  - matplotlib
+  # - openmpi=3.1.0
+# openmpi MUST BE INSTALLED to run parallel implementations (but not serial implementations)
+prefix: /home/ec2-user/anaconda3/envs/submodular_env
