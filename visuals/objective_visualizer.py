@@ -24,7 +24,6 @@ for i in range(len(Greedy_Trials)):
     greedy_vals = []
     dual_vals = []
     dualhist_vals = []
-    dualfit_vals = []
     pd_vals = []
     k_vals = []
     n = 0
@@ -34,7 +33,6 @@ for i in range(len(Greedy_Trials)):
       for row in reader_greedy:
         greedy_vals.append(float(row[0]))
         k_vals.append(int(row[3]))
-        dualfit_vals.append(float(row[6]))
         n = int(row[4])
     with open("../experiment_results_output_data/"+PrimalDual_Trials[i]) as pdcsv:
        reader_pd = csv.reader(pdcsv, delimiter =',')
