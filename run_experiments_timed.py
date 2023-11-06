@@ -61,7 +61,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
 
             # Run the algorithm
             valG, queriesG, timeG, solG, sol_rG, time_rG, queries_rG = submodular.greedy(objective, kk)
-            valPD, queriesPD, timePD, solPD, sol_rPD, time_rPD, queries_rPD, dual = submodular.primal_dual(objective, kk)
+            valPD, queriesPD, timePD, solPD, sol_rPD, time_rPD, queries_rPD, dual, dual_hist = submodular.primal_dual(objective, kk)
             valBQS, queriesBQS, timeBQS = submodular.BQSBOUND(objective, kk, [[]]+sol_rG)
 
             if rank == p_root:
