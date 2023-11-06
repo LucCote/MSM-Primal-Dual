@@ -25,7 +25,8 @@ for i in range(len(Greedy_Trials)):
     greedy_vals = []
     dual_vals = []
     dualhist_vals = []
-    dualfit_vals = []
+    dualfitmin_vals = []
+    dualfitavg_vals = []
     DUAL_vals = []
     topk_vals = []
     marginal_vals = []
@@ -39,7 +40,6 @@ for i in range(len(Greedy_Trials)):
       for row in reader_greedy:
         greedy_vals.append(float(row[0]))
         k_vals.append(int(row[3]))
-        dualfit_vals.append(float(row[6]))
         n = int(row[4])
     with open("../experiment_results_output_data/"+PrimalDual_Trials[i]) as pdcsv:
        reader_pd = csv.reader(pdcsv, delimiter =',')
@@ -56,13 +56,15 @@ for i in range(len(Greedy_Trials)):
            topk_vals.append(float(row[1]))
            marginal_vals.append(float(row[2]))
            curvature_vals.append(float(row[3]))
+           dualfitmin_vals.append(float(row[4]))
+           dualfitavg_vals.append(float(row[5]))
     
     ax1 = int(i / 4)
     ax2 = i % 4
     X = k_vals
   
     ax[ax1, ax2].plot(X, dual_vals, color = 'purple', label = '$\sf{dual}$', linestyle='-', marker='o')
-    ax[ax1, ax2].plot(X, dualfit_vals, color = 'orange', label = '$\sf{dualfit}$', linestyle='-', marker='x')
+    ax[ax1, ax2].plot(X, dualfitmin_vals, color = 'orange', label = '$\sf{dualfit}$', linestyle='-', marker='x')
     ax[ax1, ax2].plot(X, DUAL_vals, color = 'g', label = 'BQS', linestyle='--', marker='^')
     ax[ax1, ax2].plot(X, topk_vals, color = 'r', label = 'topk', linestyle='--', marker='s')
     ax[ax1, ax2].plot(X, marginal_vals, color = 'b', label = 'marginal', linestyle='--', marker='p')

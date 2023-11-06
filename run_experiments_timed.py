@@ -42,13 +42,13 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
     valG_vec = []
     valPD_vec = []
     dual_vec = []
-    valD_vec = []
+    valBQS_vec = []
     queriesG_vec = []
     queriesPD_vec = []
-    queriesD_vec = []
+    queriesBQS_vec = []
     timeG_vec = []
     timePD_vec = []
-    timeD_vec = []
+    timeBQS_vec = []
     
     # Save data progressively. 
     for ii, kk in enumerate(k_vals_vec):
@@ -62,35 +62,35 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
             # Run the algorithm
             valG, queriesG, timeG, solG, sol_rG, time_rG, queries_rG = submodular.greedy(objective, kk)
             valPD, queriesPD, timePD, solPD, sol_rPD, time_rPD, queries_rPD, dual = submodular.primal_dual(objective, kk)
-            valD, queriesD, timeD = submodular.BQSBOUND(objective, kk, [[]]+sol_rG)
+            valBQS, queriesBQS, timeBQS = submodular.BQSBOUND(objective, kk, [[]]+sol_rG)
 
             if rank == p_root:
-                print('DUAL=', valD, 'queriesD=', queriesD, 'timeD=', timeD + timeG, 'dual=',dual, 'queriesPD=', queriesPD, 'timePD=', timePD, algostring, experiment_string, 'k=', kk)
+                print('BQS=', valBQS, 'queriesBQS=', queriesBQS, 'timeD=', timeBQS + timeG, 'dual=',dual, 'queriesPD=', queriesPD, 'timePD=', timePD, algostring, experiment_string, 'k=', kk)
                 print('\n')
 
                 valG_vec.append(valG)
                 valPD_vec.append(valPD)
                 dual_vec.append(dual)
-                valD_vec.append(valD)
+                valBQS_vec.append(valBQS)
                 queriesG_vec.append(queriesG)
                 queriesPD_vec.append(queriesPD)
-                queriesD_vec.append(queriesD+queriesG)
+                queriesBQS_vec.append(queriesBQS+queriesG)
                 timeG_vec.append(timeG)
                 timePD_vec.append(timePD)
-                timeD_vec.append(timeD + timeG)
+                timeBQS_vec.append(timeBQS + timeG)
 
                 ## Save data progressively
                 print(len(valG_vec), len(np.concatenate([np.repeat(range(trials), ii), range(1, (trial+1))])))
                 dataset = pd.DataFrame({'dual':  dual_vec, \
-                                        'DUAL': valD_vec, \
+                                        'BQS': valBQS_vec, \
                                         'greedy': valG_vec, \
                                         'pd': valPD_vec, \
                                         'queriesG': queriesG_vec, \
                                         'queriesPD': queriesPD_vec, \
-                                        'queriesD': queriesD_vec, \
+                                        'queriesBQS': queriesBQS_vec, \
                                         'timeG':    timeG_vec, \
                                         'timePD':    timePD_vec, \
-                                        'timeD':    timeD_vec, \
+                                        'timeBQS':    timeBQS_vec, \
                                         'k':       np.concatenate([np.repeat(k_vals_vec[:ii], trials), [kk]*(trial+1)]), \
                                         'n':       [size_groundset]*(ii*trials+trial+1), \
                                         'trial':   np.concatenate([np.tile(range(1,(trials+1)), ii), range(1, (trial+2))]), \

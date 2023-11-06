@@ -20,7 +20,6 @@ def check_inputs(objective, k):
     # the ground set contains all integers from 0 to the max integer in the set
     assert( np.array_equal(objective.groundset, list(range(np.max(objective.groundset)+1) )) )
 
-
 def greedy(objective, k):
     ''' 
     Greedy algorithm: for k steps.
@@ -37,7 +36,6 @@ def greedy(objective, k):
     list of lists L_rounds -- each element is a list containing the solution set L at the corresponding round
     list time_rounds -- each element is the elapsed number of seconds measured at the completion of the corresponding round in L_rounds.
     list query_rounds -- each element is the elapsed number queries measured at the completion of the corresponding round in L_rounds.
-    float dualfit -- upper bound on the optimal solution
     '''
     check_inputs(objective, k)
 
@@ -46,7 +44,6 @@ def greedy(objective, k):
 
     L = []
     N = [ele for ele in objective.groundset]
-    dualfits = []
 
     L_rounds = []
     time_rounds = [0]
@@ -66,12 +63,10 @@ def greedy(objective, k):
         L_rounds.append([ele for ele in L])
         time_rounds.append((datetime.now() - time0).total_seconds())
         query_rounds.append(queries)
-        mFj = max([objective.marginalval( [elem], L ) for elem in N])
-        dualfits.append(k*mFj + objective.value(L))
 
     val = objective.value(L)
     time = (datetime.now() - time0).total_seconds()
-    return val, queries, time, L, L_rounds, time_rounds, query_rounds, min(dualfits)
+    return val, queries, time, L, L_rounds, time_rounds, query_rounds
 
 def primal_dual(objective, k):
     ''' 
@@ -182,7 +177,6 @@ def primal_dual(objective, k):
 
     return val, queries, time, L, L_rounds, time_rounds, query_rounds, ((k*a)+y), dual_hist
 
-FPE = 0.001
 def method3(objective, k, S):
     ''' 
     @author: Luc Cote
@@ -194,8 +188,10 @@ def method3(objective, k, S):
     
     OUTPUTS:
     float sum(V) -- an upper bound on the optimal solution
+    int queries -- the total queries (marginal values count as 2 queries since f(T)-f(S) )
     '''
     check_inputs(objective, k)
+    queries = 0
     N = [ele for ele in objective.groundset]
     N.sort(key=lambda ele: -1*objective.marginalval( [ele], S))
     v = np.array([0.0 for i in range(k)])
@@ -204,17 +200,21 @@ def method3(objective, k, S):
     for j in range(k):
         i_s = None
         for i in range(start, len(N)):
-            if objective.marginalval(N[:i+1], S) - sv >= objective.marginalval( [N[i]], S) - FPE:
+            queries += 4
+            if objective.marginalval(N[:i+1], S) - sv >= objective.marginalval( [N[i]], S):
                 i_s = i
                 break
-        if objective.marginalval(N[:i_s], S) - sv >= objective.marginalval( [N[i]], S) - FPE:
+        queries += 2
+        if objective.marginalval(N[:i_s], S) - sv >= objective.marginalval( [N[i]], S):
             i_s = i_s - 1
             v[j] = objective.marginalval( N[:i_s+1], S) - sv
+            queries += 2
         else:
             v[j] = objective.marginalval( [N[i_s]], S)
+            queries += 2
         start = i_s
         sv += v[j]
-    return sum(v)
+    return sum(v),queries
 
 def BQSBOUND(objective, k, S):
     ''' 
@@ -228,21 +228,24 @@ def BQSBOUND(objective, k, S):
     
     OUTPUTS:
     float sum(V) -- an upper bound on the optimal solution
+    int queries -- the total queries (marginal values count as 2 queries since f(T)-f(S) )
     '''
     check_inputs(objective, k)
     time0 = datetime.now()
+    queries = 0
     N = [ele for ele in objective.groundset]
-    OPT = objective.value(N)
+    OPT = float("inf")
     i = 0
     for Si in S:
         if i > 50: break
         if i > 20 and i % 5 != 0:
             continue
-        OPTP, qm3 = method3(objective, k, Si)
+        OPTP,qm3 = method3(objective, k, Si)
+        queries += qm3
         OPT = min(OPT, OPTP + objective.value(Si))
         i += 1
     time = (datetime.now() - time0).total_seconds()
-    return OPT, time
+    return OPT,queries,time
 
 
 def topk(objective, k):
@@ -316,8 +319,59 @@ def curvature(objective, k):
     c = 1-objective.marginalval([a], S)/objective.value([a])
     return (1.0-np.exp(-c))/c
 
+def greedy_dualfit_min(objective, k, S):
+    ''' 
+    @author: Luc Cote
+    Dual fitting upper bound for the greedy algorithm - generates k+1 dual values - each with tau mass on a single greedy solution set and picks the minimum value
+    
+    INPUTS:
+    class objective -- contains the methods 'value()' that we want to optimize and its marginal value function 'marginalval()' 
+    int k -- the cardinality constraint
+    list S -- contains k+1 sets derived from iterations of the greedy algorithm on this k-MSM instance
+    
+    OUTPUTS:
+    float dual -- an upper bound on the optimal solution
+    '''
+    dual_fits = []
+    for Si in S:
+        g = objective.value(Si)
+        a = max([objective.marginalval([ele], Si) for ele in objective.groundset])
+        dual_fits.append(g+k*a)
+    dual = min(dual_fits)
+    return dual
+
+def greedy_dualfit_avg(objective, k, S):
+    ''' 
+    @author: Luc Cote
+    Dual fitting upper bound for the greedy algorithm - generates k+1 dual values - each with some tau mass (theta) on every greedy solution set
+    
+    INPUTS:
+    class objective -- contains the methods 'value()' that we want to optimize and its marginal value function 'marginalval()' 
+    int k -- the cardinality constraint
+    list S -- contains k+1 sets derived from iterations of the greedy algorithm on this k-MSM instance
+    
+    OUTPUTS:
+    float dual -- an upper bound on the optimal solution
+    '''
+    g = 0
+    T = [0]*(k+1)
+    T[k] = 1/(k*(1-(1-1/k)**k))
+    for i in range(k):
+        T[k-i-1] = T[k-i]*(1-1/k)
+        g += objective.value(S[i])
+    
+    a = 0
+    for ele in objective.groundset:
+        bele = 0
+        for i in range(k+1):
+            bele += T[i]*objective.marginalval([ele],S[i])
+        if bele > a:
+            a = bele
+    dual = k*a+g
+    return dual
+
 def upper_bounds(objective, k):
-    val, queries, time, L, L_hist, time_rounds, query_rounds, dualfits = greedy(objective, k)
+    val, queries, time, L, L_hist, time_rounds, query_rounds = greedy(objective, k)
     S = [[]] + L_hist # include empty greedy solution
-    BQSval, time = BQSBOUND(objective, k, S)
-    return BQSval, topk(objective, k), marginal(objective, k, S), curvature(objective, k)
+    BQSval,queries,time = BQSBOUND(objective, k, S)
+    return BQSval, topk(objective, k), marginal(objective, k, S), curvature(objective, k), greedy_dualfit_min(objective, k, S), greedy_dualfit_avg(objective, k, S)
