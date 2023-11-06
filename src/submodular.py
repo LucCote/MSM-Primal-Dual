@@ -340,7 +340,7 @@ def greedy_dualfit_min(objective, k, S):
     dual = min(dual_fits)
     return dual
 
-def greedy_dualfit_avg(objective, k, S):
+def greedy_dualfit_tau(objective, k, S):
     ''' 
     @author: Luc Cote
     Dual fitting upper bound for the greedy algorithm - generates k+1 dual values - each with some tau mass (theta) on every greedy solution set
@@ -354,24 +354,24 @@ def greedy_dualfit_avg(objective, k, S):
     float dual -- an upper bound on the optimal solution
     '''
     g = 0
-    T = [0]*(k+1)
-    T[k] = 1/(k*(1-(1-1/k)**k))
-    for i in range(k):
+    T = [0]*(k)
+    T[k-1] = 1/(k*(1-(1-1/k)**k))
+    g += T[k-1]*objective.value(S[k-1])
+    for i in range(1,k):
         T[k-i-1] = T[k-i]*(1-1/k)
-        g += objective.value(S[i])
-    
+        g += T[k-i-1]*objective.value(S[k-i-1])
     a = 0
     for ele in objective.groundset:
         bele = 0
-        for i in range(k+1):
+        for i in range(k):
             bele += T[i]*objective.marginalval([ele],S[i])
         if bele > a:
             a = bele
-    dual = k*a+g
+    dual = (k*a)+g
     return dual
 
 def upper_bounds(objective, k):
     val, queries, time, L, L_hist, time_rounds, query_rounds = greedy(objective, k)
     S = [[]] + L_hist # include empty greedy solution
     BQSval,queries,time = BQSBOUND(objective, k, S)
-    return BQSval, topk(objective, k), marginal(objective, k, S), curvature(objective, k), greedy_dualfit_min(objective, k, S), greedy_dualfit_avg(objective, k, S)
+    return BQSval, topk(objective, k), marginal(objective, k, S), curvature(objective, k), greedy_dualfit_min(objective, k, S), greedy_dualfit_tau(objective, k, S)

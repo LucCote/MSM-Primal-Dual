@@ -151,7 +151,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
     marginal_vec = []
     curvature_vec = []
     dualfit_min_vec = []
-    dualfit_avg_vec = []
+    dualfit_tau_vec = []
 
     # Save data progressively. 
     for ii, kk in enumerate(k_vals_vec):
@@ -159,7 +159,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
             comm.barrier()
 
             # Run the algorithms
-            BQS, topk, marginal, curvature, dualfit_min, dualfit_avg = submodular.upper_bounds(objective, kk)
+            BQS, topk, marginal, curvature, dualfit_min, dualfit_tau = submodular.upper_bounds(objective, kk)
         
             if rank == p_root:
                 print('BQS=', BQS, 'topk=', topk, 'marginal=', marginal, 'curvature=', curvature, algostring, experiment_string, 'k=', kk)
@@ -170,7 +170,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
                 marginal_vec.append(marginal)
                 curvature_vec.append(curvature)
                 dualfit_min_vec.append(dualfit_min)
-                dualfit_avg_vec.append(dualfit_avg)
+                dualfit_tau_vec.append(dualfit_tau)
 
                 ## Save data progressively
                 print(len(val_vec), len(np.concatenate([np.repeat(range(trials), ii), range(1, (trial+1))])))
@@ -179,7 +179,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
                                         'marginal': marginal_vec, \
                                         'curvature': curvature_vec, \
                                         'dualfit_min': dualfit_min_vec, \
-                                        'dualfit_avg': dualfit_avg_vec, \
+                                        'dualfit_tau': dualfit_tau_vec, \
                                         'k':       np.concatenate([np.repeat(k_vals_vec[:ii], trials), [kk]*(trial+1)]), \
                                         'n':       [size_groundset]*(ii*trials+trial+1), \
                                         'trial':   np.concatenate([np.tile(range(1,(trials+1)), ii), range(1, (trial+2))]), \

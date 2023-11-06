@@ -16,18 +16,13 @@ def mean(data):
 
 figure, ax = plt.subplots(2, 4)
 
-dualfit_avgs = []
-topk_avgs = []
-marginal_avgs = []
-curvature_avgs = []
-
 for i in range(len(Greedy_Trials)):
     greedy_vals = []
     dual_vals = []
     dualhist_vals = []
     dualfitmin_vals = []
-    dualfitavg_vals = []
-    DUAL_vals = []
+    dualfittau_vals = []
+    BQS_vals = []
     topk_vals = []
     marginal_vals = []
     curvature_vals = []
@@ -52,23 +47,23 @@ for i in range(len(Greedy_Trials)):
        reader_pd = csv.reader(pdcsv, delimiter =',')
        next(reader_pd)
        for row in reader_pd:
-           DUAL_vals.append(float(row[0]))
+           BQS_vals.append(float(row[0]))
            topk_vals.append(float(row[1]))
            marginal_vals.append(float(row[2]))
            curvature_vals.append(float(row[3]))
            dualfitmin_vals.append(float(row[4]))
-           dualfitavg_vals.append(float(row[5]))
+           dualfittau_vals.append(float(row[5]))
     
     ax1 = int(i / 4)
     ax2 = i % 4
     X = k_vals
   
-    ax[ax1, ax2].plot(X, dual_vals, color = 'purple', label = '$\sf{dual}$', linestyle='-', marker='o')
-    ax[ax1, ax2].plot(X, dualfitmin_vals, color = 'orange', label = '$\sf{dualfit}$', linestyle='-', marker='x')
-    ax[ax1, ax2].plot(X, DUAL_vals, color = 'g', label = 'BQS', linestyle='--', marker='^')
-    ax[ax1, ax2].plot(X, topk_vals, color = 'r', label = 'topk', linestyle='--', marker='s')
+    ax[ax1, ax2].plot(X, dual_vals, color = 'purple', label = 'primdual', linestyle='-', marker='o')
+    ax[ax1, ax2].plot(X, [min(dualfittau_vals[i], dualfittau_vals[i]) for i in range(len(dualfitmin_vals))], color = 'orange', label = '$greedyfit$', linestyle='-', marker='x')
+    ax[ax1, ax2].plot(X, BQS_vals, color = 'g', label = 'BQS', linestyle='--', marker='^')
+    # ax[ax1, ax2].plot(X, topk_vals, color = 'r', label = 'topk', linestyle='--', marker='s')
     ax[ax1, ax2].plot(X, marginal_vals, color = 'b', label = 'marginal', linestyle='--', marker='p')
-    ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, curvature_vals)], color = 'brown', label = 'curvature', linestyle='--', marker='*')
+    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, curvature_vals)], color = 'brown', label = 'curvature', linestyle='--', marker='*')
     ax[ax1, ax2].set(xlabel='k Value', ylabel='Certificate Value')
     ax[ax1, ax2].set_title(Trial_Names[i] + " (n=" +str(n)+")")
 
