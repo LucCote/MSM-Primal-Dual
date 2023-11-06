@@ -65,7 +65,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
             valBQS, queriesBQS, timeBQS = submodular.BQSBOUND(objective, kk, [[]]+sol_rG)
 
             if rank == p_root:
-                print('BQS=', valBQS, 'queriesBQS=', queriesBQS, 'timeD=', timeBQS + timeG, 'dual=',dual, 'queriesPD=', queriesPD, 'timePD=', timePD, algostring, experiment_string, 'k=', kk)
+                print('BQS=', valBQS, 'queriesBQS=', queriesBQS, 'timeBQS=', timeBQS + timeG, 'dual=',dual, 'queriesPD=', queriesPD, 'timePD=', timePD, algostring, experiment_string, 'k=', kk)
                 print('\n')
 
                 valG_vec.append(valG)
