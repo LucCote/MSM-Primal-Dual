@@ -59,11 +59,11 @@ for i in range(len(Greedy_Trials)):
     X = k_vals
   
     ax[ax1, ax2].plot(X, dual_vals, color = 'purple', label = 'primdual', linestyle='-', marker='o')
-    ax[ax1, ax2].plot(X, [min(dualfittau_vals[i], dualfittau_vals[i]) for i in range(len(dualfitmin_vals))], color = 'orange', label = '$greedyfit$', linestyle='-', marker='x')
+    ax[ax1, ax2].plot(X, [min(dualfitmin_vals[i], dualfittau_vals[i]) for i in range(len(dualfitmin_vals))], color = 'orange', label = '$greedyfit$', linestyle='-', marker='x')
     ax[ax1, ax2].plot(X, BQS_vals, color = 'g', label = 'BQS', linestyle='--', marker='^')
-    # ax[ax1, ax2].plot(X, topk_vals, color = 'r', label = 'topk', linestyle='--', marker='s')
+    ax[ax1, ax2].plot(X, topk_vals, color = 'r', label = 'topk', linestyle='--', marker='s')
     ax[ax1, ax2].plot(X, marginal_vals, color = 'b', label = 'marginal', linestyle='--', marker='p')
-    # ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, curvature_vals)], color = 'brown', label = 'curvature', linestyle='--', marker='*')
+    ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, curvature_vals)], color = 'brown', label = 'curvature', linestyle='--', marker='*')
     ax[ax1, ax2].set(xlabel='k Value', ylabel='Certificate Value')
     ax[ax1, ax2].set_title(Trial_Names[i] + " (n=" +str(n)+")")
 
