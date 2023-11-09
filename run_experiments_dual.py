@@ -152,6 +152,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
     curvature_vec = []
     dualfit_min_vec = []
     dualfit_tau_vec = []
+    dualfit_lp_vec = []
 
     # Save data progressively. 
     for ii, kk in enumerate(k_vals_vec):
@@ -159,7 +160,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
             comm.barrier()
 
             # Run the algorithms
-            BQS, topk, marginal, curvature, dualfit_min, dualfit_tau = submodular.upper_bounds(objective, kk)
+            BQS, topk, marginal, curvature, dualfit_min, dualfit_tau, dualfit_lp = submodular.upper_bounds(objective, kk)
         
             if rank == p_root:
                 print('BQS=', BQS, 'topk=', topk, 'marginal=', marginal, 'curvature=', curvature, algostring, experiment_string, 'k=', kk)
@@ -171,6 +172,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
                 curvature_vec.append(curvature)
                 dualfit_min_vec.append(dualfit_min)
                 dualfit_tau_vec.append(dualfit_tau)
+                dualfit_lp_vec.append(dualfit_lp)
 
                 ## Save data progressively
                 print(len(val_vec), len(np.concatenate([np.repeat(range(trials), ii), range(1, (trial+1))])))
@@ -180,6 +182,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
                                         'curvature': curvature_vec, \
                                         'dualfit_min': dualfit_min_vec, \
                                         'dualfit_tau': dualfit_tau_vec, \
+                                        'dualfit_lp': dualfit_lp_vec, \
                                         'k':       np.concatenate([np.repeat(k_vals_vec[:ii], trials), [kk]*(trial+1)]), \
                                         'n':       [size_groundset]*(ii*trials+trial+1), \
                                         'trial':   np.concatenate([np.tile(range(1,(trials+1)), ii), range(1, (trial+2))]), \
@@ -468,6 +471,49 @@ if __name__ == '__main__':
     
 
 
+    # # #####################################################################
+    # # ##          INFLUENCEMAX  Physics Citation NETWORK Example         #######
+    # # #####################################################################
+    if rank == p_root:
+        print( 'Initializing Physics Citations Objective' )
+    experiment_string = 'INFMAXCitation'
+
+    # directed Citation Network. Format as an adjacency matrix
+    filename_net = "data/ca-HepTh.txt"
+    # edgelist = pd.read_edgelist(filename_net)
+    # net_nx = nx.from_pandas_edgelist(edgelist, \
+    #                                  source='source', \
+    #                                  target='target', \
+    #                                  edge_attr=None, \
+    #                                  create_using=None)
+    net_nx = nx.read_edgelist(filename_net)
+    try:
+        net_nx.remove_edges_from(net_nx.selfloop_edges())
+    except:
+        net_nx.remove_edges_from(nx.selfloop_edges(net_nx)) #Later version of networkx prefers this syntax
+
+
+    #A = np.asarray( nx.adjacency_matrix(net_nx).todense() )
+    if rank == p_root:
+        print( 'Loaded data. Generating sparse adjacency matrix' )
+    A = nx.to_scipy_sparse_matrix(net_nx, format='csr')
+    A.setdiag(1)
+
+    A = A.toarray().astype(np.bool)
+
+    p = 0.01
+    objective = InfluenceMax.InfluenceMax(A, p)
+    if rank == p_root:
+        print( 'Citation Influence Objective initialized. Beginning tests.' )
+    
+    k_vals_vec = [5,10,20,30]
+    # k_vals_vec = [5]
+
+    comm.barrier()
+    run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
+    
+
+
 
     # ##############################################################
     # ## DIRECTED EdgeCover ON CALI ROAD NETWORK EXPERIMENT ########
@@ -545,6 +591,7 @@ if __name__ == '__main__':
 
     try:
         Sim = MovieRecommenderMonotoneCover.load_movie_user_matrix(movie_user_mat_fname)
+        print(Sim.shape[1])
         if rank != p_root:
             Sim = None # Free memory on all but root proc -- we just try to have them load to test whether the movie data exists
 
@@ -582,7 +629,7 @@ if __name__ == '__main__':
 
         objective = comm.bcast(objective, p_root)
 
-        k_vals_vec = [25, 50, 75, 100, 125, 150, 175, 200]
+        k_vals_vec = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
         # k_vals_vec = [5]
 
         comm.barrier()
@@ -590,7 +637,7 @@ if __name__ == '__main__':
         run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
 
 
-    except:
+    except Exception as e:
         if rank == 0:
             print('\nThe final experiment (movie recommendation) requires a large movies data file (too large for GitHub).\
                    Add this file to the /data/ folder to run this experiment.\n')

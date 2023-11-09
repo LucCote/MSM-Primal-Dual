@@ -1,12 +1,10 @@
-'''
-@author: Adam Breuer
-'''
 from datetime import datetime
 import numpy as np
 
 
 def check_inputs(objective, k):
     '''
+    @author: Adam Breuer
     Function to run basic tests on the inputs of one of our optimization functions:
     '''
     # objective class contains the ground set and also value, marginalval methods
@@ -22,6 +20,7 @@ def check_inputs(objective, k):
 
 def greedy(objective, k):
     ''' 
+    @author: Adam Breuer
     Greedy algorithm: for k steps.
     
     INPUTS:
@@ -198,7 +197,7 @@ def method3(objective, k, S):
     start = 0
     sv = 0
     for j in range(k):
-        i_s = None
+        i_s = k+1 # None
         for i in range(start, len(N)):
             queries += 4
             if objective.marginalval(N[:i+1], S) - sv >= objective.marginalval( [N[i]], S):
@@ -370,8 +369,46 @@ def greedy_dualfit_tau(objective, k, S):
     dual = (k*a)+g
     return dual
 
+def greedyLP(objective, k, S):
+    ''' 
+    @author: Luc Cote
+    Dual fitting upper bound for the greedy algorithm - generates k+1 dual values - each with some tau mass (theta) on every greedy solution set
+    
+    INPUTS:
+    class objective -- contains the methods 'value()' that we want to optimize and its marginal value function 'marginalval()' 
+    int k -- the cardinality constraint
+    list S -- contains k+1 sets derived from iterations of the greedy algorithm on this k-MSM instance
+    
+    OUTPUTS:
+    float res.fun -- a dual upper bound on the optimal solution
+    '''
+    N = [ele for ele in objective.groundset]
+    import scipy
+    from scipy import optimize
+    # x vec: [a,tau(S1),tau(S2,..]
+    c = np.zeros(k+2)
+    c[0] = k
+    for i in range(k+1):
+        c[i+1] = objective.value(S[i])
+    Au = np.zeros((len(N),len(c)))
+    bu = np.zeros(len(N))
+    for i in range(len(N)):
+        ele = N[i]
+        Au[i][0] = -1
+        for j in range(k+1):
+            Au[i][j+1] = 1*objective.marginalval([ele], S[j])
+        bu[i] = 0
+    Ae = np.ones((1,len(c)))
+    Ae[0][0] = 0
+    be = np.array([1])
+    res = scipy.optimize.linprog(c,A_ub=Au,b_ub=bu,A_eq=Ae,b_eq=be,options={"tol":1e-8})
+    if res.status != 0:
+        print("Failed optimization at k=",k)
+        print(S)
+    return res.fun
+
 def upper_bounds(objective, k):
     val, queries, time, L, L_hist, time_rounds, query_rounds = greedy(objective, k)
     S = [[]] + L_hist # include empty greedy solution
     BQSval,queries,time = BQSBOUND(objective, k, S)
-    return BQSval, topk(objective, k), marginal(objective, k, S), curvature(objective, k), greedy_dualfit_min(objective, k, S), greedy_dualfit_tau(objective, k, S)
+    return BQSval, topk(objective, k), marginal(objective, k, S), curvature(objective, k), greedy_dualfit_min(objective, k, S), greedy_dualfit_tau(objective, k, S), greedyLP(objective,k,S)
