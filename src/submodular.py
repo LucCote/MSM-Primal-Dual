@@ -264,6 +264,7 @@ def topk(objective, k):
     '''
     N = [ele for ele in objective.groundset]
     N.sort(key=lambda ele: -1*objective.value([ele]))
+    print("Topk list", [objective.value([ele]) for ele in N[:k]], "k=",k, "list=",N)
     return sum([objective.value([ele]) for ele in N[:k]])
 
 def marginal(objective, k, S):
@@ -419,5 +420,5 @@ def upper_bounds(objective, k):
     val, queries, time, L, L_hist, time_rounds, query_rounds = greedy(objective, k)
     S = [[]] + L_hist # include empty greedy solution
     BQSval,queries,time = BQSBOUND(objective, k, S)
-    greedyLP, queries, time = greedyLP(objective,k,S)
-    return BQSval, topk(objective, k), marginal(objective, k, S), curvature(objective, k), greedy_dualfit_min(objective, k, S), greedy_dualfit_tau(objective, k, S), greedyLP
+    greedyLPval, queries, time = greedyLP(objective,k,S)
+    return BQSval, topk(objective, k), marginal(objective, k, S), curvature(objective, k), greedy_dualfit_min(objective, k, S), greedy_dualfit_tau(objective, k, S), greedyLPval
