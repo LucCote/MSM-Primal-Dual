@@ -401,7 +401,7 @@ def greedyLP(objective, k, S):
     Ae = np.ones((1,len(c)))
     Ae[0][0] = 0
     be = np.array([1])
-    res = scipy.optimize.linprog(c,A_ub=Au,b_ub=bu,A_eq=Ae,b_eq=be,options={"tol":1e-8})
+    res = scipy.optimize.linprog(c,A_ub=Au,b_ub=bu,A_eq=Ae,b_eq=be,options={"tol":1e-5})
     if res.status != 0:
         print("Failed optimization at k=",k)
         print(S)
