@@ -43,12 +43,15 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
     valPD_vec = []
     dual_vec = []
     valBQS_vec = []
+    valGLP_vec = []
     queriesG_vec = []
     queriesPD_vec = []
     queriesBQS_vec = []
+    queriesGLP_vec = []
     timeG_vec = []
     timePD_vec = []
     timeBQS_vec = []
+    timeGLP_vec = []
     
     # Save data progressively. 
     for ii, kk in enumerate(k_vals_vec):
@@ -63,6 +66,7 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
             valG, queriesG, timeG, solG, sol_rG, time_rG, queries_rG = submodular.greedy(objective, kk)
             valPD, queriesPD, timePD, solPD, sol_rPD, time_rPD, queries_rPD, dual, dual_hist = submodular.primal_dual(objective, kk)
             valBQS, queriesBQS, timeBQS = submodular.BQSBOUND(objective, kk, [[]]+sol_rG)
+            valGLP, queriesGLP, timeGLP = submodular.greedyLP(objective, kk, [[]]+sol_rG)
 
             if rank == p_root:
                 print('BQS=', valBQS, 'queriesBQS=', queriesBQS, 'timeBQS=', timeBQS + timeG, 'dual=',dual, 'queriesPD=', queriesPD, 'timePD=', timePD, algostring, experiment_string, 'k=', kk)
@@ -72,12 +76,15 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
                 valPD_vec.append(valPD)
                 dual_vec.append(dual)
                 valBQS_vec.append(valBQS)
+                valGLP_vec.append(valGLP)
                 queriesG_vec.append(queriesG)
                 queriesPD_vec.append(queriesPD)
                 queriesBQS_vec.append(queriesBQS+queriesG)
+                queriesGLP_vec.append(queriesGLP+queriesG)
                 timeG_vec.append(timeG)
                 timePD_vec.append(timePD)
                 timeBQS_vec.append(timeBQS + timeG)
+                timeGLP_vec.append(timeGLP+timeG)
 
                 ## Save data progressively
                 print(len(valG_vec), len(np.concatenate([np.repeat(range(trials), ii), range(1, (trial+1))])))
@@ -85,12 +92,15 @@ def run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_
                                         'BQS': valBQS_vec, \
                                         'greedy': valG_vec, \
                                         'pd': valPD_vec, \
+                                        'GLP': valGLP_vec, \
                                         'queriesG': queriesG_vec, \
                                         'queriesPD': queriesPD_vec, \
                                         'queriesBQS': queriesBQS_vec, \
+                                        'queriesGLP': queriesGLP_vec, \
                                         'timeG':    timeG_vec, \
                                         'timePD':    timePD_vec, \
                                         'timeBQS':    timeBQS_vec, \
+                                        'timeGLP':    timeGLP_vec, \
                                         'k':       np.concatenate([np.repeat(k_vals_vec[:ii], trials), [kk]*(trial+1)]), \
                                         'n':       [size_groundset]*(ii*trials+trial+1), \
                                         'trial':   np.concatenate([np.tile(range(1,(trials+1)), ii), range(1, (trial+2))]), \

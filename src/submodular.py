@@ -1,5 +1,7 @@
 from datetime import datetime
 import numpy as np
+import scipy
+from scipy import optimize
 
 
 def check_inputs(objective, k):
@@ -228,6 +230,7 @@ def BQSBOUND(objective, k, S):
     OUTPUTS:
     float sum(V) -- an upper bound on the optimal solution
     int queries -- the total queries (marginal values count as 2 queries since f(T)-f(S) )
+    float time -- the processing time to optimize the function.
     '''
     check_inputs(objective, k)
     time0 = datetime.now()
@@ -381,15 +384,18 @@ def greedyLP(objective, k, S):
     
     OUTPUTS:
     float res.fun -- a dual upper bound on the optimal solution
+    int queries -- the total queries (marginal values count as 2 queries since f(T)-f(S) )
+    float time -- the processing time to optimize the function.
     '''
+    queries = 0
+    time0 = datetime.now()
     N = [ele for ele in objective.groundset]
-    import scipy
-    from scipy import optimize
     # x vec: [a,tau(S1),tau(S2,..]
     c = np.zeros(k+2)
     c[0] = k
     for i in range(k+1):
         c[i+1] = objective.value(S[i])
+        queries+=1
     Au = np.zeros((len(N),len(c)))
     bu = np.zeros(len(N))
     for i in range(len(N)):
@@ -397,6 +403,7 @@ def greedyLP(objective, k, S):
         Au[i][0] = -1
         for j in range(k+1):
             Au[i][j+1] = 1*objective.marginalval([ele], S[j])
+            queries += 1
         bu[i] = 0
     Ae = np.ones((1,len(c)))
     Ae[0][0] = 0
@@ -405,10 +412,12 @@ def greedyLP(objective, k, S):
     if res.status != 0:
         print("Failed optimization at k=",k)
         print(S)
-    return res.fun
+    time = (datetime.now() - time0).total_seconds()
+    return res.fun, queries, time
 
 def upper_bounds(objective, k):
     val, queries, time, L, L_hist, time_rounds, query_rounds = greedy(objective, k)
     S = [[]] + L_hist # include empty greedy solution
     BQSval,queries,time = BQSBOUND(objective, k, S)
-    return BQSval, topk(objective, k), marginal(objective, k, S), curvature(objective, k), greedy_dualfit_min(objective, k, S), greedy_dualfit_tau(objective, k, S), greedyLP(objective,k,S)
+    greedyLP, queries, time = greedyLP(objective,k,S)
+    return BQSval, topk(objective, k), marginal(objective, k, S), curvature(objective, k), greedy_dualfit_min(objective, k, S), greedy_dualfit_tau(objective, k, S), greedyLP
