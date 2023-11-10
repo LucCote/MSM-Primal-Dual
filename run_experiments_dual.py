@@ -228,247 +228,247 @@ if __name__ == '__main__':
 
 
 
-    # # ##################################################################
-    # # ##################################################################
-    # # ######                 SYNTHETIC GRAPH DATA                 ######
-    # # ##################################################################
-    # # ##################################################################
+    # ##################################################################
+    # ##################################################################
+    # ######                 SYNTHETIC GRAPH DATA                 ######
+    # ##################################################################
+    # ##################################################################
 
 
-    # # # ################################################################
-    # # # ## Boolean Undirected VertCover SBM Example ####################
-    # # # ################################################################
-    # comm.barrier()
-    # if rank == p_root:
-    #     print( 'Initializing SBM Objective' )
-    # experiment_string = 'SBM'
+    # # ################################################################
+    # # ## Boolean Undirected VertCover SBM Example ####################
+    # # ################################################################
+    comm.barrier()
+    if rank == p_root:
+        print( 'Initializing SBM Objective' )
+    experiment_string = 'SBM'
 
-    # #Generate the SBM Adj. Matrix
-    # comm.barrier()
-    # objective_rootprocessor = None
-    # np.random.seed(42)
+    #Generate the SBM Adj. Matrix
+    comm.barrier()
+    objective_rootprocessor = None
+    np.random.seed(42)
 
-    # # Root processor generates the random graph
-    # if rank == p_root:
+    # Root processor generates the random graph
+    if rank == p_root:
 
-    #     minSize = 25 # min cluster size
-    #     maxSize = 100 # max cluster size
-    #     numberC = int(np.ceil(np.float(size_of_ground_set) / np.mean((minSize, maxSize))))
-    #     p = 0.01  # = prob of edge
-    #     A = GraphGenerators.SBMSparseCSR(numberC, minSize, maxSize, p)
-    #     A.setdiag(1)
+        minSize = 25 # min cluster size
+        maxSize = 100 # max cluster size
+        numberC = int(np.ceil(np.float(size_of_ground_set) / np.mean((minSize, maxSize))))
+        p = 0.01  # = prob of edge
+        A = GraphGenerators.SBMSparseCSR(numberC, minSize, maxSize, p)
+        A.setdiag(1)
 
-    #     if A.shape[0] <= 1000:
-    #         A = A.toarray()
-    #         A.astype(np.bool)
-    #         # Generate our NetCover class containing the function
-    #         objective_rootprocessor = NetCover.NetCover(A)
-    #     else:
-    #         objective_rootprocessor = NetCoverSparse.NetCoverSparse(A)
+        if A.shape[0] <= 1000:
+            A = A.toarray()
+            A.astype(np.bool)
+            # Generate our NetCover class containing the function
+            objective_rootprocessor = NetCover.NetCover(A)
+        else:
+            objective_rootprocessor = NetCoverSparse.NetCoverSparse(A)
 
-    # if rank != 0:
-    #     objective_rootprocessor = None
-    # objective = comm.bcast(objective_rootprocessor, root=0)
-    # print (len(objective.groundset), np.sum(objective.A), rank)
-    # ## For testing:
-    # if rank == p_root:
-    #     print( 'SBM Objective initialized. Beginning tests.' )
-    #     print ('size of ground set:', len(objective.groundset))
+    if rank != 0:
+        objective_rootprocessor = None
+    objective = comm.bcast(objective_rootprocessor, root=0)
+    print (len(objective.groundset), np.sum(objective.A), rank)
+    ## For testing:
+    if rank == p_root:
+        print( 'SBM Objective initialized. Beginning tests.' )
+        print ('size of ground set:', len(objective.groundset))
 
-    # comm.barrier()
-    # k_vals_vec = [10, 15, 20, 25, 30, 35, 40] 
-    # # k_vals_vec = [5]
-    # run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
-
-
-
-
-    # # # ################################################################
-    # # # ## Boolean Undirected VertCover ER Example #####################
-    # # # ################################################################
-    # k_vals_vec = [10, 15, 20, 25, 30, 35, 40] 
-    # # k_vals_vec = [5]
-
-    # comm.barrier()
-    # if rank == p_root:
-    #     print( 'Initializing ER Objective' )
-    # experiment_string = 'ER'
-
-    # # Set the seed before generating random ER matrix 
-    # np.random.seed(42)
-
-    # objective_rootprocessor = None
-
-    # if rank == p_root:
-    #     # Set p == prob of an edge in Erdos Renyi
-    #     p = 0.01
-
-    #     #Generate the ER Adj. Matrix. Use sparse matrix if A is big (matrix operations slower in sparse format)
-    #     if size_of_ground_set <= 1000:
-    #         A = GraphGenerators.ErdosRenyiSymBool(size_of_ground_set, p)
-    #         np.fill_diagonal(A, 1)
-    #         A.astype(np.bool)
-    #         objective_rootprocessor = NetCover.NetCover(A)
-
-    #     else:
-    #         A = GraphGenerators.ErdosRenyiSymBoolSparseCSR(size_of_ground_set, p)
-    #         A.setdiag(1)
-    #         objective_rootprocessor = NetCoverSparse.NetCoverSparse(A)
-
-    # comm.barrier()
-    # objective = comm.bcast(objective_rootprocessor, root=0)
-    # print ('n:', len(objective.groundset), 'sum(A):', np.sum(objective.A), 'Processor_rank:', rank)
-
-    # ## For testing:
-    # if rank == p_root:
-    #     print( 'ER Objective initialized. Beginning tests.' )
-
-    # run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
+    comm.barrier()
+    k_vals_vec = [10, 15, 20, 25, 30, 35, 40] 
+    # k_vals_vec = [5]
+    run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
 
 
 
 
-    # # #################################################################
-    # # ## Boolean Undirected Watts-Strogatz Example ####################
-    # # #################################################################
-    # # k_vals_vec = [20, 40, 60, 80, 100, 120, 140, 160, 180]
-    # k_vals_vec = [10, 15, 20, 25, 30, 35, 40] 
+    # # ################################################################
+    # # ## Boolean Undirected VertCover ER Example #####################
+    # # ################################################################
+    k_vals_vec = [10, 15, 20, 25, 30, 35, 40] 
+    # k_vals_vec = [5]
 
-    # # k_vals_vec = [5]
+    comm.barrier()
+    if rank == p_root:
+        print( 'Initializing ER Objective' )
+    experiment_string = 'ER'
 
-    # comm.barrier()
-    # if rank == p_root:
-    #     print( 'Initializing WS Objective' )
-    # experiment_string = 'WS'
+    # Set the seed before generating random ER matrix 
+    np.random.seed(42)
 
-    # if rank == p_root:
+    objective_rootprocessor = None
 
-    #     G = nx.watts_strogatz_graph(n=size_of_ground_set, k=2, p=0.1, seed=42)
-    #     try:
-    #         G.remove_edges_from(G.selfloop_edges())
-    #     except:
-    #         G.remove_edges_from(nx.selfloop_edges(G)) #Later version of networkx prefers this syntax
+    if rank == p_root:
+        # Set p == prob of an edge in Erdos Renyi
+        p = 0.01
 
-    #     if size_of_ground_set <= 1000:
-    #         A = np.asarray( nx.to_numpy_matrix(G) )
-    #         np.fill_diagonal(A, 1)
-    #         A.astype(np.bool)
-    #         print( 'size of A', A.shape[0])
-    #         print( 'density of A', np.sum(A)/len(A)**2)
-    #         # Generate our NetCover class containing the function
-    #         objective_rootprocessor = NetCover.NetCover(A)
+        #Generate the ER Adj. Matrix. Use sparse matrix if A is big (matrix operations slower in sparse format)
+        if size_of_ground_set <= 1000:
+            A = GraphGenerators.ErdosRenyiSymBool(size_of_ground_set, p)
+            np.fill_diagonal(A, 1)
+            A.astype(np.bool)
+            objective_rootprocessor = NetCover.NetCover(A)
 
-    #     else:
-    #         A = nx.to_scipy_sparse_matrix(G, format='csr')
-    #         A.setdiag(1)
-    #         # Generate our NetCover class containing the function
-    #         objective_rootprocessor = NetCoverSparse.NetCoverSparse(A)
+        else:
+            A = GraphGenerators.ErdosRenyiSymBoolSparseCSR(size_of_ground_set, p)
+            A.setdiag(1)
+            objective_rootprocessor = NetCoverSparse.NetCoverSparse(A)
+
+    comm.barrier()
+    objective = comm.bcast(objective_rootprocessor, root=0)
+    print ('n:', len(objective.groundset), 'sum(A):', np.sum(objective.A), 'Processor_rank:', rank)
+
+    ## For testing:
+    if rank == p_root:
+        print( 'ER Objective initialized. Beginning tests.' )
+
+    run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
+
+
+
+
+    # #################################################################
+    # ## Boolean Undirected Watts-Strogatz Example ####################
+    # #################################################################
+    # k_vals_vec = [20, 40, 60, 80, 100, 120, 140, 160, 180]
+    k_vals_vec = [10, 15, 20, 25, 30, 35, 40] 
+
+    # k_vals_vec = [5]
+
+    comm.barrier()
+    if rank == p_root:
+        print( 'Initializing WS Objective' )
+    experiment_string = 'WS'
+
+    if rank == p_root:
+
+        G = nx.watts_strogatz_graph(n=size_of_ground_set, k=2, p=0.1, seed=42)
+        try:
+            G.remove_edges_from(G.selfloop_edges())
+        except:
+            G.remove_edges_from(nx.selfloop_edges(G)) #Later version of networkx prefers this syntax
+
+        if size_of_ground_set <= 1000:
+            A = np.asarray( nx.to_numpy_matrix(G) )
+            np.fill_diagonal(A, 1)
+            A.astype(np.bool)
+            print( 'size of A', A.shape[0])
+            print( 'density of A', np.sum(A)/len(A)**2)
+            # Generate our NetCover class containing the function
+            objective_rootprocessor = NetCover.NetCover(A)
+
+        else:
+            A = nx.to_scipy_sparse_matrix(G, format='csr')
+            A.setdiag(1)
+            # Generate our NetCover class containing the function
+            objective_rootprocessor = NetCoverSparse.NetCoverSparse(A)
         
-    # if rank != 0:
-    #     objective_rootprocessor = None
-    # objective = comm.bcast(objective_rootprocessor, root=0)
+    if rank != 0:
+        objective_rootprocessor = None
+    objective = comm.bcast(objective_rootprocessor, root=0)
 
-    # if rank == p_root:
-    #     print( 'Watts-Strogatz Objective initialized. Beginning tests.' )
-    # comm.barrier()
-    # run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
+    if rank == p_root:
+        print( 'Watts-Strogatz Objective initialized. Beginning tests.' )
+    comm.barrier()
+    run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
 
 
 
     
-    # # ###############################################################
-    # # ## Boolean Undirected VertCover BA Example ####################
-    # # ###############################################################
-    # k_vals_vec = [10, 15, 20, 25, 30, 35, 40]
-    # # k_vals_vec = [5]
+    # ###############################################################
+    # ## Boolean Undirected VertCover BA Example ####################
+    # ###############################################################
+    k_vals_vec = [10, 15, 20, 25, 30, 35, 40]
+    # k_vals_vec = [5]
 
-    # comm.barrier()
-    # if rank == p_root:
-    #     print( 'Initializing BA Objective' )
-    # experiment_string = 'BA'
+    comm.barrier()
+    if rank == p_root:
+        print( 'Initializing BA Objective' )
+    experiment_string = 'BA'
 
-    # if rank == p_root:
+    if rank == p_root:
 
-    #     G = nx.barabasi_albert_graph(size_of_ground_set, 1, seed=1)
-    #     try:
-    #         G.remove_edges_from(G.selfloop_edges())
-    #     except:
-    #         G.remove_edges_from(nx.selfloop_edges(G)) #Later version of networkx prefers this syntax
+        G = nx.barabasi_albert_graph(size_of_ground_set, 1, seed=1)
+        try:
+            G.remove_edges_from(G.selfloop_edges())
+        except:
+            G.remove_edges_from(nx.selfloop_edges(G)) #Later version of networkx prefers this syntax
 
-    #     if size_of_ground_set <= 1000:
-    #         A = np.asarray( nx.to_numpy_matrix(G) )
-    #         np.fill_diagonal(A, 1)
+        if size_of_ground_set <= 1000:
+            A = np.asarray( nx.to_numpy_matrix(G) )
+            np.fill_diagonal(A, 1)
 
-    #         A.astype(np.bool)
-    #         print( 'size of A', A.shape[0])
-    #         print( 'density of A', np.sum(A)/len(A)**2)
-    #         objective_rootprocessor = NetCover.NetCover(A)
+            A.astype(np.bool)
+            print( 'size of A', A.shape[0])
+            print( 'density of A', np.sum(A)/len(A)**2)
+            objective_rootprocessor = NetCover.NetCover(A)
 
-    #     else:
-    #         A = nx.to_scipy_sparse_matrix(G, format='csr')
-    #         A.setdiag(1)
-    #         objective_rootprocessor = NetCoverSparse.NetCoverSparse(A)
+        else:
+            A = nx.to_scipy_sparse_matrix(G, format='csr')
+            A.setdiag(1)
+            objective_rootprocessor = NetCoverSparse.NetCoverSparse(A)
 
-    # if rank != 0:
-    #     objective_rootprocessor = None
-    # objective = comm.bcast(objective_rootprocessor, root=0)
+    if rank != 0:
+        objective_rootprocessor = None
+    objective = comm.bcast(objective_rootprocessor, root=0)
 
-    # if rank == p_root:
-    #     print( 'BA Objective initialized. Beginning tests.' )
-    # comm.barrier()
-    # run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
-
-
-
-
-    # ################################################################
-    # ################################################################
-    # #############           REAL DATA            ###################
-    # ################################################################
-    # ################################################################
+    if rank == p_root:
+        print( 'BA Objective initialized. Beginning tests.' )
+    comm.barrier()
+    run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
 
 
 
-    # # # #####################################################################
-    # # # ##          INFLUENCEMAX  CallTech FB NETWORK Example         #######
-    # # # #####################################################################
-    # if rank == p_root:
-    #     print( 'Initializing FB CalTech Objective' )
-    # experiment_string = 'INFMAXCalTech'
 
-    # # Undirected Facebook Network. Format as an adjacency matrix
-    # filename_net = "data/socfb-Caltech36.csv"
-    # edgelist = pd.read_csv(filename_net)
-    # net_nx = nx.from_pandas_edgelist(edgelist, \
-    #                                  source='source', \
-    #                                  target='target', \
-    #                                  edge_attr=None, \
-    #                                  create_using=None)
-    # net_nx = net_nx.to_undirected()
-    # try:
-    #     net_nx.remove_edges_from(net_nx.selfloop_edges())
-    # except:
-    #     net_nx.remove_edges_from(nx.selfloop_edges(net_nx)) #Later version of networkx prefers this syntax
+    ################################################################
+    ################################################################
+    #############           REAL DATA            ###################
+    ################################################################
+    ################################################################
 
 
-    # #A = np.asarray( nx.adjacency_matrix(net_nx).todense() )
-    # if rank == p_root:
-    #     print( 'Loaded data. Generating sparse adjacency matrix' )
-    # A = nx.to_scipy_sparse_matrix(net_nx, format='csr')
-    # A.setdiag(1)
 
-    # A = A.toarray().astype(np.bool)
+    # # #####################################################################
+    # # ##          INFLUENCEMAX  CallTech FB NETWORK Example         #######
+    # # #####################################################################
+    if rank == p_root:
+        print( 'Initializing FB CalTech Objective' )
+    experiment_string = 'INFMAXCalTech'
 
-    # p = 0.01
-    # objective = InfluenceMax.InfluenceMax(A, p)
-    # if rank == p_root:
-    #     print( 'FB CalTech Objective initialized. Beginning tests.' )
+    # Undirected Facebook Network. Format as an adjacency matrix
+    filename_net = "data/socfb-Caltech36.csv"
+    edgelist = pd.read_csv(filename_net)
+    net_nx = nx.from_pandas_edgelist(edgelist, \
+                                     source='source', \
+                                     target='target', \
+                                     edge_attr=None, \
+                                     create_using=None)
+    net_nx = net_nx.to_undirected()
+    try:
+        net_nx.remove_edges_from(net_nx.selfloop_edges())
+    except:
+        net_nx.remove_edges_from(nx.selfloop_edges(net_nx)) #Later version of networkx prefers this syntax
+
+
+    #A = np.asarray( nx.adjacency_matrix(net_nx).todense() )
+    if rank == p_root:
+        print( 'Loaded data. Generating sparse adjacency matrix' )
+    A = nx.to_scipy_sparse_matrix(net_nx, format='csr')
+    A.setdiag(1)
+
+    A = A.toarray().astype(np.bool)
+
+    p = 0.01
+    objective = InfluenceMax.InfluenceMax(A, p)
+    if rank == p_root:
+        print( 'FB CalTech Objective initialized. Beginning tests.' )
     
-    # k_vals_vec = [25, 50, 100, 150, 200, 250, 300]
-    # # k_vals_vec = [5]
+    k_vals_vec = [25, 50, 100, 150, 200, 250, 300]
+    # k_vals_vec = [5]
 
-    # comm.barrier()
-    # run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
+    comm.barrier()
+    run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
     
 
 
@@ -516,61 +516,61 @@ if __name__ == '__main__':
 
 
 
-    # # ##############################################################
-    # # ## DIRECTED EdgeCover ON CALI ROAD NETWORK EXPERIMENT ########
-    # # ##############################################################
-    # experiment_string = 'CAROAD'
-    # # Weighted Directed highway adjacency matrix
-    # filename = "data/Pems_Adj_thresh_10mi_522n.csv"
+    # ##############################################################
+    # ## DIRECTED EdgeCover ON CALI ROAD NETWORK EXPERIMENT ########
+    # ##############################################################
+    experiment_string = 'CAROAD'
+    # Weighted Directed highway adjacency matrix
+    filename = "data/Pems_Adj_thresh_10mi_522n.csv"
 
-    # A = pd.read_csv(filename).values
+    A = pd.read_csv(filename).values
 
-    # # Generate our DIRECTED MaxCut class containing the function
-    # objective = TrafficCoverDirWeighted.TrafficCoverDirWeighted(A)
+    # Generate our DIRECTED MaxCut class containing the function
+    objective = TrafficCoverDirWeighted.TrafficCoverDirWeighted(A)
 
-    # k_vals_vec = [20, 40, 60, 80, 100, 120, 140, 160]
-    # # k_vals_vec = [5]
+    k_vals_vec = [20, 40, 60, 80, 100, 120, 140, 160]
+    # k_vals_vec = [5]
 
-    # # Print info and start the stopwatch
-    # if rank == p_root:
-    #     print ('Starting California experiment. Network size = ', str(A.shape[0]), ' nodes.')
-    # comm.barrier()
+    # Print info and start the stopwatch
+    if rank == p_root:
+        print ('Starting California experiment. Network size = ', str(A.shape[0]), ' nodes.')
+    comm.barrier()
 
-    # run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
+    run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
     
 
 
 
-    # # ############################################################
-    # # ## YOUTUBE REVENUE MAXIMIZATION EXAMPLE ####################
-    # # ############################################################
-    # comm.barrier()
-    # if rank == p_root:
-    #     print( 'Initializing Youtube Objective' )
-    # experiment_string = 'YOUTUBE50'
+    # ############################################################
+    # ## YOUTUBE REVENUE MAXIMIZATION EXAMPLE ####################
+    # ############################################################
+    comm.barrier()
+    if rank == p_root:
+        print( 'Initializing Youtube Objective' )
+    experiment_string = 'YOUTUBE50'
 
-    # edgelist = pd.read_csv('data/youtube_50rand_edgelist.csv', delimiter=',')
-    # # Edgelist to Adjacency Matrix
-    # A = edgelist.pivot(index = "source", columns = "target", values = "weight_draw")
-    # # Cast to Numpy Matrix
-    # #A = A.as_matrix()
-    # A = A.values
-    # # Missing edges are 0
-    # A[np.isnan(A)] = 0
+    edgelist = pd.read_csv('data/youtube_50rand_edgelist.csv', delimiter=',')
+    # Edgelist to Adjacency Matrix
+    A = edgelist.pivot(index = "source", columns = "target", values = "weight_draw")
+    # Cast to Numpy Matrix
+    #A = A.as_matrix()
+    A = A.values
+    # Missing edges are 0
+    A[np.isnan(A)] = 0
 
-    # A[A>0] = A[A>0] + 1.0
+    A[A>0] = A[A>0] + 1.0
 
-    # alpha = 0.9
-    # # Generate class containing our f(S)
-    # objective = RevenueMaxOnNet.RevenueMaxOnNet(A, alpha)
-    # if rank == p_root:
-    #     print( 'YOUTUBE Objective initialized. Adjacency matrix shape is:', A.shape, ' Beginning tests.' )
+    alpha = 0.9
+    # Generate class containing our f(S)
+    objective = RevenueMaxOnNet.RevenueMaxOnNet(A, alpha)
+    if rank == p_root:
+        print( 'YOUTUBE Objective initialized. Adjacency matrix shape is:', A.shape, ' Beginning tests.' )
 
-    # k_vals_vec = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
-    # # k_vals_vec = [5]
+    k_vals_vec = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+    # k_vals_vec = [5]
 
-    # comm.barrier()
-    # run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
+    comm.barrier()
+    run_adaptive_experiments(objective, k_vals_vec, filepath_string, experiment_string, comm, rank, size)
 
 
 
