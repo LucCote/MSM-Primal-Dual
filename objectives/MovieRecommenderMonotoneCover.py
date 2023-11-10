@@ -107,10 +107,20 @@ def load_movie_genres(movies_dat_fname):
     movie_years = [ int((title.rsplit('(',1)[1]).replace(')','')) for title in movie_titles ]
 
     genres_strings = movies_df['Genres'].values
+    print("df", movies_df.shape)
+    print("genres", len(genres_strings))
     genres_dict = {gi: idx for idx, gi in enumerate(set(genres_strings))}
-    genres_idx = [genres_dict[gi] for gi in genres_strings]
+    genres_idx = np.zeros(max(movies_df["MovieID"].values))
+    genres_strings_2 = [""]*max(movies_df["MovieID"].values)
+    movie_titles_2 = [""]*max(movies_df["MovieID"].values)
+    movie_years_2 = np.zeros(max(movies_df["MovieID"].values))
+    for i in range(len(genres_strings)):
+        genres_idx[movies_df["MovieID"].values[i]-1] = genres_dict[genres_strings[i]]
+        genres_strings_2[movies_df["MovieID"].values[i]-1] = genres_strings[i]
+        movie_titles_2[movies_df["MovieID"].values[i]-1] = movie_titles[i]
+        movie_years_2[movies_df["MovieID"].values[i]-1] = movie_years[i]
 
-    return np.array(genres_idx), genres_dict, np.array(genres_strings), np.array(movie_titles), np.array(movie_years)
+    return np.array(genres_idx), genres_dict, np.array(genres_strings_2), np.array(movie_titles_2), np.array(movie_years_2)
 
 
 
@@ -126,7 +136,18 @@ def load_movie_user_matrix(movie_user_mat_fname):
     Return a transposed 2d numpy array so that rows are movies
     '''
     # Load the movie ratings matrix. NOTE that USERS ARE ROWS (6040) and MOVIES ARE COLUMNS (3706) (we transpose this before returning)
-    Sim = pd.read_csv(movie_user_mat_fname, header=None).values
+    # Sim = pd.read_csv(movie_user_mat_fname, header=None).values
+    df = pd.read_csv(movie_user_mat_fname,sep='::', header=None)
+    # s=df.pivot(*df.columns)
+    # print(df.iloc[:,0].values)
+    num_users = max(df.iloc[:,0].values.astype(np.int))
+    num_movies = max(df.iloc[:,1].values.astype(np.int))
+    matrix = np.zeros([num_users, num_movies])
+    # matrix[:] = np.nan
+    for _, row in df.iterrows():
+        matrix[int(row[0]) - 1, int(row[1]) - 1] = int(row[2])
+    Sim = matrix
+    print(Sim.shape)
     return Sim.T
 
 
