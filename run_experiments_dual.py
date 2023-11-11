@@ -507,7 +507,7 @@ if __name__ == '__main__':
     if rank == p_root:
         print( 'Citation Influence Objective initialized. Beginning tests.' )
     
-    k_vals_vec = [20,40,60,80,100,120,140]
+    k_vals_vec = [20,40,60,80,100]
     # k_vals_vec = [5]
 
     comm.barrier()
