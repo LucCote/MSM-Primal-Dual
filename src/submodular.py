@@ -264,7 +264,6 @@ def topk(objective, k):
     '''
     N = [ele for ele in objective.groundset]
     N.sort(key=lambda ele: -1*objective.value([ele]))
-    print("Topk list", [objective.value([ele]) for ele in N[:k]], "k=",k, "list=",N)
     return sum([objective.value([ele]) for ele in N[:k]])
 
 def marginal(objective, k, S):
@@ -403,16 +402,18 @@ def greedyLP(objective, k, S):
         ele = N[i]
         Au[i][0] = -1
         for j in range(k+1):
-            Au[i][j+1] = 1*objective.marginalval([ele], S[j])
+            Au[i][j+1] = objective.marginalval([ele], S[j])
             queries += 1
         bu[i] = 0
     Ae = np.ones((1,len(c)))
     Ae[0][0] = 0
     be = np.array([1])
-    res = scipy.optimize.linprog(c,A_ub=Au,b_ub=bu,A_eq=Ae,b_eq=be,options={"tol":1e-5})
+    x0 = np.zeros(len(c))
+    x0[0] = objective.value(S[1])
+    x0[1] = 1
+    res = scipy.optimize.linprog(c,A_ub=Au,b_ub=bu,A_eq=Ae,b_eq=be,method='interior-point')
     if res.status != 0:
         print("Failed optimization at k=",k)
-        print(S)
     time = (datetime.now() - time0).total_seconds()
     return res.fun, queries, time
 
