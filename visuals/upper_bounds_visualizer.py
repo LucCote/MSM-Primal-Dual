@@ -5,16 +5,16 @@ import csv
 import matplotlib.pyplot as plt
 from ast import literal_eval
 
-Greedy_Trials = ["ADAPTIVEm95_BA_GREEDY.csv", "ADAPTIVEm95_ER_GREEDY.csv",  "ADAPTIVEm95_SBM_GREEDY.csv", "ADAPTIVEm95_WS_GREEDY.csv", "ADAPTIVEm95_CAROAD_GREEDY.csv", "ADAPTIVEm95_INFMAXCalTech_GREEDY.csv", "ADAPTIVEm95_YOUTUBE50_GREEDY.csv"]
-PrimalDual_Trials = ["ADAPTIVEm95_BA_Primal-Dual.csv", "ADAPTIVEm95_ER_Primal-Dual.csv", "ADAPTIVEm95_SBM_Primal-Dual.csv", "ADAPTIVEm95_WS_Primal-Dual.csv", "ADAPTIVEm95_CAROAD_Primal-Dual.csv", "ADAPTIVEm95_INFMAXCalTech_Primal-Dual.csv", "ADAPTIVEm95_YOUTUBE50_Primal-Dual.csv"]
-Upper_Trials = ["ADAPTIVEm95_BA_UPPER_BOUNDS.csv", "ADAPTIVEm95_ER_UPPER_BOUNDS.csv", "ADAPTIVEm95_SBM_UPPER_BOUNDS.csv", "ADAPTIVEm95_WS_UPPER_BOUNDS.csv", "ADAPTIVEm95_CAROAD_UPPER_BOUNDS.csv", "ADAPTIVEm95_INFMAXCalTech_UPPER_BOUNDS.csv", "ADAPTIVEm95_YOUTUBE50_UPPER_BOUNDS.csv"]
+Greedy_Trials = ["ADAPTIVEm95_BA_GREEDY.csv", "ADAPTIVEm95_ER_GREEDY.csv",  "ADAPTIVEm95_SBM_GREEDY.csv", "ADAPTIVEm95_WS_GREEDY.csv", "ADAPTIVEm95_CAROAD_GREEDY.csv", "ADAPTIVEm95_INFMAXCalTech_GREEDY.csv", "ADAPTIVEm95_YOUTUBE50_GREEDY.csv", "ADAPTIVEm95_INFMAXCitation_GREEDY.csv", "ADAPTIVEm95_MOVIECOVERsubset_GREEDY.csv"]
+PrimalDual_Trials = ["ADAPTIVEm95_BA_Primal-Dual.csv", "ADAPTIVEm95_ER_Primal-Dual.csv", "ADAPTIVEm95_SBM_Primal-Dual.csv", "ADAPTIVEm95_WS_Primal-Dual.csv", "ADAPTIVEm95_CAROAD_Primal-Dual.csv", "ADAPTIVEm95_INFMAXCalTech_Primal-Dual.csv", "ADAPTIVEm95_YOUTUBE50_Primal-Dual.csv","ADAPTIVEm95_INFMAXCitation_Primal-Dual.csv", "ADAPTIVEm95_MOVIECOVERsubset_Primal-Dual.csv"]
+Upper_Trials = ["ADAPTIVEm95_BA_UPPER_BOUNDS.csv", "ADAPTIVEm95_ER_UPPER_BOUNDS.csv", "ADAPTIVEm95_SBM_UPPER_BOUNDS.csv", "ADAPTIVEm95_WS_UPPER_BOUNDS.csv", "ADAPTIVEm95_CAROAD_UPPER_BOUNDS.csv", "ADAPTIVEm95_INFMAXCalTech_UPPER_BOUNDS.csv", "ADAPTIVEm95_YOUTUBE50_UPPER_BOUNDS.csv","ADAPTIVEm95_INFMAXCitation_UPPER_BOUNDS.csv", "ADAPTIVEm95_MOVIECOVERsubset_UPPER_BOUNDS.csv"]
 
-Trial_Names = ["BA Graph", "ER Graph", "SBM Graph", "WS Graph", "CA ROADs Dataset", "Caltech Facebook Dataset", "Youtube Reccomendation Dataset"]
+Trial_Names = ["BA Graph", "ER Graph", "SBM Graph", "WS Graph", "CA ROADs Dataset", "Caltech Facebook Dataset", "Youtube Reccomendation Dataset", "Citations Dataset", "MovieLens Dataset"]
 
 def mean(data):
   return sum(data)/len(data)
 
-figure, ax = plt.subplots(2, 4)
+figure, ax = plt.subplots(3, 3)
 
 for i in range(len(Greedy_Trials)):
     greedy_vals = []
@@ -22,6 +22,7 @@ for i in range(len(Greedy_Trials)):
     dualhist_vals = []
     dualfitmin_vals = []
     dualfittau_vals = []
+    dualfitlp_vals = []
     BQS_vals = []
     topk_vals = []
     marginal_vals = []
@@ -53,20 +54,23 @@ for i in range(len(Greedy_Trials)):
            curvature_vals.append(float(row[3]))
            dualfitmin_vals.append(float(row[4]))
            dualfittau_vals.append(float(row[5]))
+           dualfitlp_vals.append(float(row[6]))
     
-    ax1 = int(i / 4)
-    ax2 = i % 4
+    ax1 = int(i / 3)
+    ax2 = i % 3
     X = k_vals
   
     ax[ax1, ax2].plot(X, dual_vals, color = 'purple', label = 'primdual', linestyle='-', marker='o')
-    ax[ax1, ax2].plot(X, [min(dualfitmin_vals[i], dualfittau_vals[i]) for i in range(len(dualfitmin_vals))], color = 'orange', label = '$greedyfit$', linestyle='-', marker='x')
+    ax[ax1, ax2].plot(X, [min(dualfitmin_vals[i], dualfittau_vals[i]) for i in range(len(dualfitmin_vals))], color = 'orange', label = 'GreeDual1', linestyle='-', marker='x')
+    ax[ax1, ax2].plot(X, dualfitlp_vals, color = 'b', label = 'GreeDual2', linestyle='-', marker='x')
     ax[ax1, ax2].plot(X, BQS_vals, color = 'g', label = 'BQS', linestyle='--', marker='^')
     ax[ax1, ax2].plot(X, topk_vals, color = 'r', label = 'topk', linestyle='--', marker='s')
-    ax[ax1, ax2].plot(X, marginal_vals, color = 'b', label = 'marginal', linestyle='--', marker='p')
+    ax[ax1, ax2].plot(X, marginal_vals, color = 'pink', label = 'marginal', linestyle='--', marker='p')
     ax[ax1, ax2].plot(X, [l / j for l, j in zip(greedy_vals, curvature_vals)], color = 'brown', label = 'curvature', linestyle='--', marker='*')
     ax[ax1, ax2].set(xlabel='k Value', ylabel='Certificate Value')
     ax[ax1, ax2].set_title(Trial_Names[i] + " (n=" +str(n)+")")
 
-figure.delaxes(ax[1, 3])
-ax[1][2].legend(loc='center left', bbox_to_anchor=(1.3, 0.5))
+
+handles, labels = ax[0][0].get_legend_handles_labels()
+figure.legend(handles,labels,loc='upper center', ncol=6, fontsize=15)
 plt.show()

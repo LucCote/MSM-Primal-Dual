@@ -411,7 +411,7 @@ def greedyLP(objective, k, S):
     x0 = np.zeros(len(c))
     x0[0] = objective.value(S[1])
     x0[1] = 1
-    res = scipy.optimize.linprog(c,A_ub=Au,b_ub=bu,A_eq=Ae,b_eq=be,method='interior-point')
+    res = scipy.optimize.linprog(c,A_ub=Au,b_ub=bu,A_eq=Ae,b_eq=be,method='interior-point',options={"autoscale":True})
     if res.status != 0:
         print("Failed optimization at k=",k)
     time = (datetime.now() - time0).total_seconds()
